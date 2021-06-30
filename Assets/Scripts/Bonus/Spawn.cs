@@ -3,17 +3,19 @@ using UnityEngine;
 
 public class Spawn : MonoBehaviour
 {
-    int bonusMaxCount = 10;
-    int enemyMaxCount = 25;
+
+
     float minTimeSpawn = 2f, maxTimeSpawn = 5.5f;
 
     public List<Transform> spawnEnemyZone;
 
-    float callTimerBonus = 2;
-    float callTimerEnemy = 2;
+    float callSpawnTimer = 2;
 
-    int BonusCount = 0;
-    int EnemyCount = 0;
+    int bonusCount = 0;
+    int enemyCount = 0;
+    int bonusMaxCount = 0;
+    int enemyMaxCount = 0;
+
 
     private void Awake()
     {
@@ -24,72 +26,65 @@ public class Spawn : MonoBehaviour
     {
         BonusInteraction.sing.spawn = this;
 
-        InvokeRepeating("BonusSpawn", 1, callTimerBonus);
-        InvokeRepeating("EnemySpawn", 1, callTimerEnemy);
+        bonusMaxCount = ObjPool.Instance.GetMaxObjFromType(TypeObj.Bonus);
+        enemyMaxCount = ObjPool.Instance.GetMaxObjFromType(TypeObj.Enemy);
+
+        InvokeRepeating(nameof(MaybeSpawn), 1, callSpawnTimer);
     }
 
 
-    void BonusSpawn() 
+    void MaybeSpawn() 
     {
-        if (BonusCount < bonusMaxCount)
+        Debug.Log("Bonus = "+ bonusCount + "    Enemy = " + enemyCount);
+        callSpawnTimer = Random.Range(minTimeSpawn, maxTimeSpawn);
+        if (bonusCount < bonusMaxCount)
         {
-            callTimerBonus = Random.Range(minTimeSpawn, maxTimeSpawn);
-            BonusCount++;
-            InGameUI.sing.ShowInfocurrencity(BonusCount);
-            GameObject temp = Resources.Load<GameObject>("Prefab/Bonus");
-            temp = Instantiate(temp, GetRandomPoint.Get(), new Quaternion());
-            BonusInteraction.sing.AddBonus(temp.transform);
+            bonusCount++;
+            InGameUI.sing.ShowInfocurrencity(bonusCount);
+            GameObject tempBonus = ObjPool.Instance.SpawnFromPool(TypeObj.Bonus, GetRandomPoint.Get());
+            tempBonus.GetComponent<BoxCollider>().enabled = true;
+            BonusInteraction.sing.AddBonus(tempBonus.transform);
         }
-    }
-    void EnemySpawn()
-    {
-        if (EnemyCount < enemyMaxCount)
+        if (enemyCount < enemyMaxCount)
         {
-            EnemyCount++;
-            callTimerEnemy = Random.Range(minTimeSpawn + 2, maxTimeSpawn + 2);
-
-
-            GameObject enemyTemp = spawnEnemy("Prefab/enemy",spawnEnemyZone[Random.Range(0,spawnEnemyZone.Count)]);
-            enemyTemp.GetComponent<EnemyAI>().speed = Random.Range(1.5f,3f);
-            enemyTemp.GetComponent<EnemyAI>().priority = EnemyCount;
+            enemyCount++;
+            GameObject enemyTemp = spawnEnemy(spawnEnemyZone[Random.Range(0, spawnEnemyZone.Count)]);
+            enemyTemp.GetComponent<EnemyAI>().speed = Random.Range(1.5f, 3f);
+            enemyTemp.GetComponent<EnemyAI>().priority = enemyCount;
             BonusInteraction.sing.AddEnemy(enemyTemp.transform);
         }
     }
 
-    GameObject spawnEnemy(string path,Transform zone) 
+    GameObject spawnEnemy(Transform zone) 
     {
-
-
-        GameObject temp = Resources.Load<GameObject>(path);
-
-        float posX = Random.Range(zone.position.x-3, zone.position.x + 3);
+        float posX = Random.Range(zone.position.x - 3, zone.position.x + 3);
 
         float posZ = Random.Range(zone.position.z - 3, zone.position.z + 3);
 
         Vector3 tempPos = new Vector3(posX,0,posZ);
 
-
-        temp = Instantiate<GameObject>(temp,tempPos,new Quaternion());
-        return temp;
+        return ObjPool.Instance.SpawnFromPool(TypeObj.Enemy, tempPos);
     }
 
     void munisBonus(Transform destroyedObj) 
     {
-        InGameUI.sing.ShowInfocurrencity(BonusCount);
-        BonusCount = Mathf.Clamp(BonusCount - 1, 0, bonusMaxCount);
+        Debug.Log("munisBonus " + bonusCount);
+        InGameUI.sing.ShowInfocurrencity(bonusCount);
+        bonusCount = Mathf.Clamp(bonusCount-1,0,bonusMaxCount);
         BonusInteraction.sing.RemoveBonus(destroyedObj);
     }
 
     public void munisBonusInteract()
     {
-        InGameUI.sing.ShowInfocurrencity(BonusCount);
-        BonusCount = Mathf.Clamp(BonusCount - 1, 0, bonusMaxCount);
+        Debug.Log("bonusInteract " + bonusCount);
+        InGameUI.sing.ShowInfocurrencity(bonusCount);
+        bonusCount = Mathf.Clamp(bonusCount - 1,0, bonusMaxCount);
     }
 
     public void minusEnemy(Transform destroyedObj) 
     {
 
-        EnemyCount = Mathf.Clamp(EnemyCount - 1, 0, enemyMaxCount);
+        enemyCount = Mathf.Clamp(enemyCount - 1, 0, enemyMaxCount);
         BonusInteraction.sing.RemoveEnemy(destroyedObj);
     }
 

@@ -7,10 +7,10 @@ public class HeroInteract : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Enemy") 
+        if (other.gameObject.CompareTag("Enemy")) 
         {
             Hero.MunisHP();
-            Destroy(other.gameObject);
+            other.gameObject.SetActive(false); 
             spawnSc.minusEnemy(other.transform);
         }
     }

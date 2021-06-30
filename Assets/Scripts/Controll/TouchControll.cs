@@ -38,7 +38,7 @@ public class TouchControll : MonoBehaviour
         }
 
         // Touch
-        if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began)
+        if (Input.GetMouseButtonDown(0))
         {
             if(tempBonus !=null)
                 tempBonus.GetComponent<BoxCollider>().enabled = true;
@@ -47,9 +47,13 @@ public class TouchControll : MonoBehaviour
         }
     }
 
+
+    //CompareTag 
+
+
     void RayCheck() 
     {
-        Ray ray = mainCam.ScreenPointToRay(Input.GetTouch(0).position);
+        Ray ray = mainCam.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit = new RaycastHit();
 
 
@@ -76,9 +80,11 @@ public class TouchControll : MonoBehaviour
 
     void GetBonus() 
     {
+       
         OnMinusBonus?.Invoke(tempBonus.transform);
         Hero.PlusHp();
-        Destroy(tempBonus);
+        tempBonus.SetActive(false);
+        tempBonus = null;
     }
 
 

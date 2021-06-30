@@ -29,7 +29,7 @@ public class BonusInteraction : MonoBehaviour
                         i--;        // смещаем итерацию т.к элемент
                         RemoveBonus(tempBonus);             // удаляем 
                         spawn.munisBonusInteract();
-                        Destroy(tempBonus.gameObject);
+                        tempBonus.gameObject.SetActive(false);
                         break;
                     }
                 }

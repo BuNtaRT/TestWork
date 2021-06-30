@@ -8,6 +8,11 @@ public class EnemyAI : MonoBehaviour
 
     NavMeshAgent agent;
 
+    private void OnEnable()
+    {
+        gameObject.GetComponent<BoxCollider>().enabled = true;
+    }
+
     private void Start()
     {
         agent = gameObject.GetComponent<NavMeshAgent>();
